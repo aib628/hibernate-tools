@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <!-- 连接数据库信息 -->
+        <property name="hibernate.bytecode.use_reflection_optimizer">false</property>
+        <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+        <property name="hibernate.connection.password">123456</property>
+        <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/db_ishared</property>
+        <property name="hibernate.connection.username">admin</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
+        <property name="hibernate.search.autoregister_listeners">false</property>
+        <!-- 代码生成信息  info -->
+        <!--<property name="hibernatetool.metadatadialect">org.hibernate.cfg.reveng.dialect.SQLServer2008MetaDataDialect</property>-->
+        <property name="hibernatetool.metadatadialect">org.hibernate.cfg.reveng.dialect.MySQLMetaDataDialect</property>
+
+        <!-- 自定义信息 -->
+        <property name="custom.package">com</property>
+        <property name="custom.one2many">false</property>
+        <property name="custom.many2one">true</property>
+        <property name="custom.many2many">true</property>
+        <property name="custom.detectOptimisticLock">true</property>
+        <!-- 要遍历的数据库，这个是必需写正确，否在找不到表 -->
+        <property name="custom.catlog">db_ishared</property>
+        <property name="custom.schema">t_system_user</property>
+        <property name="custom.isAnnotation">true</property>
+        <property name="custom.genPojo">true</property>
+        <property name="custom.genDao">true</property>
+        <property name="custom.outputDir">H:/MyGit/hibernate-tools/gen</property>
+    </session-factory>
+</hibernate-configuration>

@@ -117,17 +117,20 @@ public class JDBCMetaDataConfiguration extends Configuration {
 	}
 	
 	public void readFromJDBC() {
-		JDBCBinder binder = new JDBCBinder(
+		readFromJDBC(null,null);		
+	}
+	
+	public void readFromJDBC(String catalog, String schema) {
+
+        JDBCBinder binder = new JDBCBinder(
 				getServiceRegistry(), 
 				getProperties(), 
 				getMetadataBuildingContext(), 
 				getReverseEngineeringStrategy(), 
 				preferBasicCompositeIds());
-		binder.readFromDatabase(
-				null, 
-				null, 
-				buildMapping(getMetadata()));		
-	}
+        
+        binder.readFromDatabase(catalog, schema, buildMapping(getMetadata()));
+    }
 	
 	@Override 
 	public SessionFactory buildSessionFactory() {
