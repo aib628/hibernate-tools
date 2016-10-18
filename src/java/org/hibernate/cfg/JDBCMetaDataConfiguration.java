@@ -117,6 +117,10 @@ public class JDBCMetaDataConfiguration extends Configuration {
 	}
 	
 	public void readFromJDBC() {
+		readFromJDBC(null, null);		
+	}
+	
+	public void readFromJDBC(String catalog,String schema) {
 		JDBCBinder binder = new JDBCBinder(
 				getServiceRegistry(), 
 				getProperties(), 
@@ -124,8 +128,8 @@ public class JDBCMetaDataConfiguration extends Configuration {
 				getReverseEngineeringStrategy(), 
 				preferBasicCompositeIds());
 		binder.readFromDatabase(
-				null, 
-				null, 
+				catalog, 
+				schema, 
 				buildMapping(getMetadata()));		
 	}
 	
