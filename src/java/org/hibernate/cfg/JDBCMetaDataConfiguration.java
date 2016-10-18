@@ -35,12 +35,14 @@ public class JDBCMetaDataConfiguration extends Configuration {
 		// TODO: doing nothing to avoid creating foreignkeys which is NOT actually in the database. 
 	}
 	
+	public void readFromJDBC(){
+		readFromJDBC(null, null);
+	}
 	
-	
-	public void readFromJDBC() {
+	public void readFromJDBC(String catalog,String schema) {
 		JDBCBinder binder = new JDBCBinder(this, buildSettings(), createMappings(),revEngStrategy);
 		
-		binder.readFromDatabase(null, null, buildMapping(this));
+		binder.readFromDatabase(catalog, schema, buildMapping(this));
 	}
 
 	static private Mapping buildMapping(final Configuration cfg) {
