@@ -88,27 +88,37 @@ public class HibernateTools implements Runnable {
 		JDBCMetaDataConfiguration metaDataConfig = new JDBCMetaDataConfiguration();
 		metaDataConfig.setProperties(properties);
 		metaDataConfig.setReverseEngineeringStrategy(new DefaultReverseEngineeringStrategy());
-		// metaDataConfig.readFromJDBC();不区分schema和catlog的话,容易碰到错误.
-		metaDataConfig.readFromJDBC(PropertiesUtils.getString(properties, Settings.CATALOG),
-				PropertiesUtils.getString(properties, Settings.SCHEMA));
-		metaDataConfig.buildMappings();
 		if (useCustomSettings) {
 			ReverseEngineeringStrategy strategy = metaDataConfig.getReverseEngineeringStrategy();
 			strategy.setSettings(getCustomSettings(strategy));
 		}
+		// metaDataConfig.readFromJDBC();不区分schema和catlog的话,容易碰到错误.
+		metaDataConfig.readFromJDBC(PropertiesUtils.getString(properties, Settings.CATALOG),
+				PropertiesUtils.getString(properties, Settings.SCHEMA));
+		metaDataConfig.buildMappings();
 
 		if (PropertiesUtils.getBoolean(properties, Settings.GENERATE_POJO, true)) {
-			System.out.println(getOutputDir(PojoSettings.OUTPUT_DIRECTORY).getAbsolutePath());
 			POJOExporter exporter = new POJOExporter(metaDataConfig, getOutputDir(PojoSettings.OUTPUT_DIRECTORY));
 			if (PropertiesUtils.getBoolean(properties, PojoSettings.IS_ANNOTATION, true)) {
 				exporter.getProperties().setProperty("ejb3", "true");// ejb3注解
 				exporter.getProperties().setProperty("jdk5", "true");// jdk5语法(主要是集合类的泛型处理)
 			}
+
+			String templatePath = PropertiesUtils.getString(properties, PojoSettings.TEMPLATE_PATH);
+			if (templatePath.length() > 0) {
+				exporter.setTemplatePath(new String[] { templatePath });
+			}
+			
 			exporter.start();
 		}
 
 		if (PropertiesUtils.getBoolean(properties, Settings.GENERATE_DAO)) {
 			DAOExporter daoExporter = new DAOExporter(metaDataConfig, getOutputDir(DaoSettings.OUTPUT_DIRECTORY));
+			String templatePath = PropertiesUtils.getString(properties, DaoSettings.TEMPLATE_PATH);
+			if (templatePath.length() > 0) {
+				daoExporter.setTemplatePath(new String[] { templatePath });
+			}
+			
 			daoExporter.start();
 		}
 
@@ -129,10 +139,12 @@ public class HibernateTools implements Runnable {
 	private ReverseEngineeringSettings getCustomSettings(ReverseEngineeringStrategy rootStrategy) {
 		return new ReverseEngineeringSettings(rootStrategy)
 				.setDefaultPackageName(PropertiesUtils.getString(properties, StrategySettings.DEFAULT_PACKAGE))
-				.setCreateCollectionForForeignKey(PropertiesUtils.getBoolean(properties,
-						StrategySettings.CREATE_COLLECTION_FOR_FOREIGN_KEY, true))
-				.setCreateManyToOneForForeignKey(PropertiesUtils.getBoolean(properties,
-						StrategySettings.CREATE_MANY_TO_ONE_FOR_FOREIGN_KEY, true))
+				.setCreateCollectionForForeignKey(
+						PropertiesUtils
+								.getBoolean(properties, StrategySettings.CREATE_COLLECTION_FOR_FOREIGN_KEY, true))
+				.setCreateManyToOneForForeignKey(
+						PropertiesUtils.getBoolean(properties, StrategySettings.CREATE_MANY_TO_ONE_FOR_FOREIGN_KEY,
+								true))
 				.setDetectOneToOne(PropertiesUtils.getBoolean(properties, StrategySettings.DETECT_ONE_TO_ONE, true))
 				.setDetectManyToMany(PropertiesUtils.getBoolean(properties, StrategySettings.DETECT_MANY_TO_MANY, true))
 				.setDetectOptimisticLock(
@@ -190,7 +202,6 @@ public class HibernateTools implements Runnable {
 		 * 指定要反向生成的Catalog名称：默认未指定
 		 */
 		public static final String CATALOG = "custom.catalog";
-
 	}
 
 	/**
@@ -206,6 +217,11 @@ public class HibernateTools implements Runnable {
 		public static final String IS_ANNOTATION = "custom.isAnnotation";
 
 		/**
+		 * 使用指定的Ftl模板路径
+		 */
+		public static final String TEMPLATE_PATH = "custom.pojo.templatePath";
+
+		/**
 		 * Pojo输出路径
 		 */
 		public static final String OUTPUT_DIRECTORY = "custom.pojo.outputDirectory";
@@ -218,6 +234,12 @@ public class HibernateTools implements Runnable {
 	 *
 	 */
 	public class DaoSettings {
+
+		/**
+		 * 使用指定的Ftl模板路径
+		 */
+		public static final String TEMPLATE_PATH = "custom.dao.templatePath";
+
 		/**
 		 * Dao输出路径
 		 */
