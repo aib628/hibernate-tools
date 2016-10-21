@@ -95,8 +95,8 @@ public class HibernateTools implements Runnable {
 		// metaDataConfig.readFromJDBC();不区分schema和catlog的话,容易碰到错误.
 		metaDataConfig.readFromJDBC(PropertiesUtils.getString(properties, Settings.CATALOG),
 				PropertiesUtils.getString(properties, Settings.SCHEMA));
-		metaDataConfig.buildMappings();
 
+		String includeTables = PropertiesUtils.getString(properties, Settings.INCLUDE_TABLES);
 		if (PropertiesUtils.getBoolean(properties, Settings.GENERATE_POJO, true)) {
 			POJOExporter exporter = new POJOExporter(metaDataConfig, getOutputDir(PojoSettings.OUTPUT_DIRECTORY));
 			if (PropertiesUtils.getBoolean(properties, PojoSettings.IS_ANNOTATION, true)) {
@@ -109,6 +109,10 @@ public class HibernateTools implements Runnable {
 				exporter.setTemplatePath(new String[] { templatePath });
 			}
 			
+			if(includeTables != null){
+				exporter.getProperties().setProperty(Settings.INCLUDE_TABLES, includeTables);
+			}
+			
 			exporter.start();
 		}
 
@@ -117,6 +121,10 @@ public class HibernateTools implements Runnable {
 			String templatePath = PropertiesUtils.getString(properties, DaoSettings.TEMPLATE_PATH);
 			if (templatePath.length() > 0) {
 				daoExporter.setTemplatePath(new String[] { templatePath });
+			}
+			
+			if(includeTables != null){
+				daoExporter.getProperties().setProperty(Settings.INCLUDE_TABLES, includeTables);
 			}
 			
 			daoExporter.start();
@@ -193,6 +201,11 @@ public class HibernateTools implements Runnable {
 		 */
 		public static final String GENERATE_DAO = "custom.isDao";
 
+		/**
+		 * 只生成指定的表,以逗号分隔、这里要以表对应的Java名称来写，不可直接写数据库里的表名称
+		 */
+		public static final String INCLUDE_TABLES = "custom.includeTable";
+		
 		/**
 		 * 指定要反向生成的Schema名称：默认未指定
 		 */

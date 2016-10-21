@@ -2,12 +2,14 @@ package org.hibernate.tool.hbm2x;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.hibernate.HibernateTools.Settings;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
 import org.hibernate.cfg.Configuration;
@@ -42,19 +44,24 @@ public class GenericExporter extends AbstractExporter {
 		});
 		modelIterators.put("entity", new ModelIterator() {		
 			void process(GenericExporter ge) {
+				List<String> includeTables = ge.getIncludeTables();
 				Iterator<?> iterator = 
 						ge.getCfg2JavaTool().getPOJOIterator(
 								ge.getMetadata().getEntityBindings().iterator());
 				Map<String, Object> additionalContext = new HashMap<String, Object>();
 				while ( iterator.hasNext() ) {					
 					POJOClass element = (POJOClass) iterator.next();
-					ge.exportPersistentClass( additionalContext, element );					
+					
+					if(includeTables.isEmpty() || includeTables.contains(element.getShortName())){
+						ge.exportPersistentClass( additionalContext, element );					
+					}
 				}
 			}
 		});
 		modelIterators.put("component", new ModelIterator() {
 			
 			void process(GenericExporter ge) {
+				List<String> includeTables = ge.getIncludeTables();
 				Map<String, Component> components = new HashMap<String, Component>();
 				
 				Iterator<?> iterator = 
@@ -70,7 +77,9 @@ public class GenericExporter extends AbstractExporter {
 				while ( iterator.hasNext() ) {					
 					Component component = (Component) iterator.next();
 					ComponentPOJOClass element = new ComponentPOJOClass(component,ge.getCfg2JavaTool());
-					ge.exportComponent( additionalContext, element );					
+					if(includeTables.isEmpty() || includeTables.contains(element.getShortName())){
+						ge.exportComponent( additionalContext, element );					
+					}
 				}
 			}
 		});
@@ -201,6 +210,15 @@ public class GenericExporter extends AbstractExporter {
 			result = new MetadataSources().buildMetadata();
 		}
 		return result;
+	}
+	
+	private List<String> getIncludeTables(){
+		String includeTables = getProperties().getProperty(Settings.INCLUDE_TABLES);
+		if(includeTables != null){
+			return Arrays.asList(includeTables.split(","));
+		}
+		
+		return new ArrayList<String>(0);
 	}
 	
 }
