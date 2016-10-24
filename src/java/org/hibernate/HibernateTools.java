@@ -204,7 +204,7 @@ public class HibernateTools implements Runnable {
 		/**
 		 * 只生成指定的表,以逗号分隔、这里要以表对应的Java名称来写，不可直接写数据库里的表名称
 		 */
-		public static final String INCLUDE_TABLES = "custom.includeTable";
+		public static final String INCLUDE_TABLES = "custom.includeTables";
 		
 		/**
 		 * 指定要反向生成的Schema名称：默认未指定
