@@ -2,15 +2,16 @@ package org.hibernate.tool.hbm2x;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.hibernate.HibernateTools.Settings;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.mapping.Component;
-import org.hibernate.mapping.PersistentClass;
 import org.hibernate.tool.hbm2x.pojo.ComponentPOJOClass;
 import org.hibernate.tool.hbm2x.pojo.POJOClass;
 import org.hibernate.util.StringHelper;
@@ -36,17 +37,22 @@ public class GenericExporter extends AbstractExporter {
 		modelIterators.put("entity", new ModelIterator() {
 		
 			void process(GenericExporter ge) {
+				List includeTables = ge.getIncludeTables(); 
 				Iterator iterator = ge.getCfg2JavaTool().getPOJOIterator(ge.getConfiguration().getClassMappings());
 				Map additionalContext = new HashMap();
 				while ( iterator.hasNext() ) {					
 					POJOClass element = (POJOClass) iterator.next();
-					ge.exportPersistentClass( additionalContext, element );					
+					
+					if(includeTables.isEmpty() || includeTables.contains(element.getShortName())){
+						ge.exportPersistentClass( additionalContext, element );					
+					}
 				}
 			}
 		});
 		modelIterators.put("component", new ModelIterator() {
 			
 			void process(GenericExporter ge) {
+				List includeTables = ge.getIncludeTables();
 				Map components = new HashMap();
 				
 				Iterator iterator = ge.getCfg2JavaTool().getPOJOIterator(ge.getConfiguration().getClassMappings());
@@ -60,7 +66,10 @@ public class GenericExporter extends AbstractExporter {
 				while ( iterator.hasNext() ) {					
 					Component component = (Component) iterator.next();
 					ComponentPOJOClass element = new ComponentPOJOClass(component,ge.getCfg2JavaTool());
-					ge.exportComponent( additionalContext, element );					
+					
+					if(includeTables.isEmpty() || includeTables.contains(element.getShortName())){
+						ge.exportComponent( additionalContext, element );					
+					}
 				}
 			}
 		});
@@ -172,5 +181,14 @@ public class GenericExporter extends AbstractExporter {
 	
 	public String getFilePattern() {
 		return filePattern;
+	}
+	
+	private List getIncludeTables(){
+		String includeTables = getProperties().getProperty(Settings.INCLUDE_TABLES);
+		if(includeTables != null){
+			return Arrays.asList(includeTables.split(","));
+		}
+		
+		return new ArrayList(0);
 	}
 }
