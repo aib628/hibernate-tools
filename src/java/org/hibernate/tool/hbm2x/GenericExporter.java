@@ -185,7 +185,7 @@ public class GenericExporter extends AbstractExporter {
 	
 	private List getIncludeTables(){
 		String includeTables = getProperties().getProperty(Settings.INCLUDE_TABLES);
-		if(includeTables != null){
+		if(StringUtils.isNotEmpty(includeTables)){
 			return Arrays.asList(includeTables.split(","));
 		}
 		
